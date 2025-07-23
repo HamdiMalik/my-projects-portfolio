@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql_db:
+    image: mysql:8.0
+    container_name: skincheck_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword123
+      MYSQL_DATABASE: skincheck_db
+      MYSQL_USER: skincheck_user
+      MYSQL_PASSWORD: skincheck_password123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./supabase/migrations/20250707113426_lucky_brook.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - skincheck_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Backend API (Mobile-Ready)
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: skincheck_backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=mysql_db
+      - DB_PORT=3306
+      - DB_NAME=skincheck_db
+      - DB_USER=skincheck_user
+      - DB_PASSWORD=skincheck_password123
+      - FLASK_ENV=mobile
+      - SECRET_KEY=mobile-production-secret-key-change-this
+      - JWT_SECRET_KEY=mobile-jwt-secret-key-change-this
+      - MOBILE_API_VERSION=v1
+      - ENABLE_OFFLINE_SYNC=true
+      - MAX_OFFLINE_SCANS=100
+    volumes:
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+    networks:
+      - skincheck_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      timeout: 10s
+      retries: 5
+
+  # Nginx Reverse Proxy (for mobile API)
+  nginx:
+    image: nginx:alpine
+    container_name: skincheck_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
+    networks:
+      - skincheck_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      timeout: 10s
+      retries: 5
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  skincheck_network:
+    driver: bridge

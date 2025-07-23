@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "669200246533",
+    "project_id": "authholtihealth",
+    "storage_bucket": "authholtihealth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:669200246533:android:e269f29646b71ede99796c",
+        "android_client_info": {
+          "package_name": "com.holtihealth.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkTmBEHjWTewssg4mzUyQEntKtHcsrV_c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

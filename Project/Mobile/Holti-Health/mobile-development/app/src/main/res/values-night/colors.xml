@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFFFF</color>
+    <color name="green">#72BF78</color>
+    <color name="transparent">#00FFFFFF</color>
+    <color name="border">#F8F5F5</color>
+    <color name="black_transparent">#80000000</color>
+
+    <color name="card_stroke_color">#424242</color>
+
+</resources>

@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: skincheck-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: skincheck_db
+      MYSQL_USER: skincheck_user
+      MYSQL_PASSWORD: skincheck_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: skincheck-backend
+    container_name: skincheck-backend
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - "5000:5000"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: skincheck_user
+      MYSQL_PASSWORD: skincheck_password
+      MYSQL_DATABASE: skincheck_db
+      SECRET_KEY: your-flask-secret-key-change-in-production
+      JWT_SECRET_KEY: your-jwt-secret-key-change-in-production
+      FLASK_ENV: production
+    volumes:
+      - ./uploads:/app/uploads
+
+volumes:
+  mysql_data:
